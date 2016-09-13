@@ -24,11 +24,39 @@ public class GameController : MonoBehaviour {
 		puzzleIndex = -1;
 	}
 
+	private void Update () {
+		if (SceneManager.GetActiveScene ().name == "main") {
+			switch (gameState) {
+			case GameState.Playing:
+				CheckForInput ();
+				break;
+			case GameState.Animating:
+				AnimateMovement (pieceToAnim, Time.deltaTime);
+				CheckIfAnimEnded ();
+				break;
+			case GameState.End:
+				Debug.Log ("Game Over");
+				break;
+			}
+		}
+	}
+
 	private void OnLevelWasLoaded () {
 		if (SceneManager.GetActiveScene ().name == "main") {
 			if (puzzleIndex > 0) {
 				LoadPuzzle ();
 				GameStarted ();
+			}
+		}
+		if (SceneManager.GetActiveScene ().name != "main") {
+			if (puzzleIndex != -1) {
+				puzzleIndex = -1;
+			}
+			if (puzzlePieces != null) {
+				puzzlePieces = null;
+			}
+			if (gameState != GameState.End) {
+				gameState = GameState.End;
 			}
 		}
 	}
@@ -139,19 +167,19 @@ public class GameController : MonoBehaviour {
 					}
 				}
 				bool pieceFound = false;
-				if (rowFound > 0 && matrix [rowFound - 1, columnFound]) {
+				if (rowFound > 0 && matrix [rowFound - 1, columnFound] == null) {
 					pieceFound = true;
 					toAnimRow = rowFound - 1;
 					toAnimColumn = columnFound;
-				} else if (columnFound > 0 && matrix [rowFound, columnFound - 1]) {
+				} else if (columnFound > 0 && matrix [rowFound, columnFound - 1] == null) {
 					pieceFound = true;
 					toAnimRow = rowFound;
 					toAnimColumn = columnFound - 1;
-				} else if (rowFound < GameVariables.MaxRows - 1 && matrix [rowFound + 1, columnFound]) {
+				} else if (rowFound < GameVariables.MaxRows - 1 && matrix [rowFound + 1, columnFound] == null) {
 					pieceFound = true;
 					toAnimRow = rowFound + 1;
 					toAnimColumn = columnFound;
-				} else if (columnFound < GameVariables.MaxColumns - 1 && matrix [rowFound, columnFound + 1]) {
+				} else if (columnFound < GameVariables.MaxColumns - 1 && matrix [rowFound, columnFound + 1] == null) {
 					pieceFound = true;
 					toAnimRow = rowFound;
 					toAnimColumn = columnFound + 1;
@@ -164,6 +192,33 @@ public class GameController : MonoBehaviour {
 				}
 			}
 		}
+	}
+
+	private void AnimateMovement (PuzzlePiece toMove, float time) {
+		toMove.GameObject.transform.position = Vector2.MoveTowards (toMove.GameObject.transform.position, screenPosToAnim, animSpeed * time);
+	}
+
+	private void CheckIfAnimEnded () {
+		if (Vector2.Distance (pieceToAnim.GameObject.transform.position, screenPosToAnim) < 0.1f) {
+			Swap (pieceToAnim.CurrentRow, pieceToAnim.CurrentColumn, toAnimRow, toAnimColumn);
+			gameState = GameState.Playing;
+			CheckForVictory ();
+		}
+	}
+
+	private void CheckForVictory () {
+		for (int row = 0; row < GameVariables.MaxRows; row++) {
+			for (int column = 0; column < GameVariables.MaxColumns; column++) {
+				if (matrix [row, column] == null) {
+					continue;
+				}  
+				if (matrix [row, column].CurrentRow != matrix [row, column].OriginalRow ||
+				    matrix [row, column].CurrentColumn != matrix [row, column].OriginalColumn) {
+					return;
+				}
+			}
+		}
+		gameState = GameState.End;
 	}
 
 	private void MakeSingleton () {
