@@ -108,6 +108,64 @@ public class GameController : MonoBehaviour {
 		matrix [randomRow, randomColumn].CurrentColumn = column;
 	}
 
+	private void CheckForInput () {
+		if (Input.GetMouseButtonDown (0)) {
+			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+			RaycastHit2D hit = Physics2D.Raycast (ray.origin, ray.direction);
+
+			if (hit.collider != null) {
+				string[] parts = hit.collider.gameObject.name.Split ('-');
+				int rowPart = int.Parse (parts [0]);
+				int columnPart = int.Parse (parts [1]);
+
+				int rowFound = -1;
+				int columnFound = -1;
+
+				for (int row = 0; row < GameVariables.MaxRows; row++) {
+					if (rowFound != -1) {
+						break;
+					}
+					for (int column = 0; column < GameVariables.MaxColumns; column++) {
+						if (columnFound != -1) {
+							break;
+						}
+						if (matrix [row, column] == null) {
+							continue;
+						}
+						if (matrix [row, column].OriginalRow == rowPart && matrix [row, column].OriginalColumn == columnPart) {
+							rowFound = row;
+							columnFound = column;
+						}
+					}
+				}
+				bool pieceFound = false;
+				if (rowFound > 0 && matrix [rowFound - 1, columnFound]) {
+					pieceFound = true;
+					toAnimRow = rowFound - 1;
+					toAnimColumn = columnFound;
+				} else if (columnFound > 0 && matrix [rowFound, columnFound - 1]) {
+					pieceFound = true;
+					toAnimRow = rowFound;
+					toAnimColumn = columnFound - 1;
+				} else if (rowFound < GameVariables.MaxRows - 1 && matrix [rowFound + 1, columnFound]) {
+					pieceFound = true;
+					toAnimRow = rowFound + 1;
+					toAnimColumn = columnFound;
+				} else if (columnFound < GameVariables.MaxColumns - 1 && matrix [rowFound, columnFound + 1]) {
+					pieceFound = true;
+					toAnimRow = rowFound;
+					toAnimColumn = columnFound + 1;
+				}
+
+				if (pieceFound) {
+					screenPosToAnim = GetScreenCoordsFromViewport (toAnimRow, toAnimColumn);
+					pieceToAnim = matrix [rowFound, columnFound];
+					gameState = GameState.Animating;
+				}
+			}
+		}
+	}
+
 	private void MakeSingleton () {
 		if (instance == null) {
 			instance = this;
