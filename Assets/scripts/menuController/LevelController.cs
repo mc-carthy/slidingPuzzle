@@ -10,6 +10,10 @@ public class LevelController : MonoBehaviour {
 
 		int index = int.Parse (name [1]);
 
+		if (GameController.instance != null) {
+			GameController.instance.SetIndex (index);
+		}
+
 		SceneManager.LoadScene ("main", LoadSceneMode.Single);
 	}
 

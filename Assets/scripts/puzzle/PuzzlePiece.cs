@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PizzlePiece {
+public class PuzzlePiece {
 
 
 	public int CurrentRow { get; set; }
