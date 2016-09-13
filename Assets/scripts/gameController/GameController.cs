@@ -47,7 +47,7 @@ public class GameController : MonoBehaviour {
 	}
 
 	private Vector3 GetScreenCoordsFromViewport (int row, int column) {
-		Vector3 point = Camera.main.ViewportToWorldPoint (new Vector3(0.22f * row, 1 - 0.235f * column, 0));
+		Vector3 point = Camera.main.ViewportToWorldPoint (new Vector3((0.185f * row) + 0.1f, (1 - 0.19f * column) - 0.1f, 0));
 		point.z = 0;
 		return point;
 	}
@@ -73,6 +73,39 @@ public class GameController : MonoBehaviour {
 
 			}
 		}
+		Shuffle ();
+		gameState = GameState.Playing;
+	}
+
+	private void Shuffle () {
+		for (int row = 0; row < GameVariables.MaxRows; row++) {
+			for (int column = 0; column < GameVariables.MaxColumns; column++) {
+				if (matrix [row, column] == null) {
+					continue;
+				} else {
+					int randomRow = Random.Range (0, GameVariables.MaxRows);
+					int randomColumn = Random.Range (0, GameVariables.MaxColumns);
+
+					Swap (row, column, randomRow, randomColumn);
+				}
+			}
+		}
+	}
+
+	private void Swap (int row, int column, int randomRow, int randomColumn) {
+		PuzzlePiece temp = matrix [row, column];
+		matrix [row, column] = matrix [randomRow, randomColumn];
+		matrix [randomRow, randomColumn] = temp;
+
+		if (matrix [row, column] != null) {
+			matrix [row, column].GameObject.transform.position = GetScreenCoordsFromViewport (row, column);
+			matrix [row, column].CurrentRow = row;
+			matrix [row, column].CurrentColumn = column;
+		}
+
+		matrix [randomRow, randomColumn].GameObject.transform.position = GetScreenCoordsFromViewport (randomRow, randomColumn);
+		matrix [randomRow, randomColumn].CurrentRow = row;
+		matrix [randomRow, randomColumn].CurrentColumn = column;
 	}
 
 	private void MakeSingleton () {
