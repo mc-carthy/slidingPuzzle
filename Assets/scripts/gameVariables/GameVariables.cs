@@ -3,8 +3,8 @@ using System.Collections;
 
 public static class GameVariables {
 
-	public static int MaxRows = 5;
-	public static int MaxColumns = 5;
+	public static int MaxRows = 4;
+	public static int MaxColumns = 4;
 	public static int MaxSize = MaxRows * MaxColumns;
 
 }
