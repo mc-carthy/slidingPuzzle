@@ -132,8 +132,8 @@ public class GameController : MonoBehaviour {
 		}
 
 		matrix [randomRow, randomColumn].GameObject.transform.position = GetScreenCoordsFromViewport (randomRow, randomColumn);
-		matrix [randomRow, randomColumn].CurrentRow = row;
-		matrix [randomRow, randomColumn].CurrentColumn = column;
+		matrix [randomRow, randomColumn].CurrentRow = randomRow;
+		matrix [randomRow, randomColumn].CurrentColumn = randomColumn;
 	}
 
 	private void CheckForInput () {
@@ -214,7 +214,10 @@ public class GameController : MonoBehaviour {
 				}  
 				if (matrix [row, column].CurrentRow != matrix [row, column].OriginalRow ||
 				    matrix [row, column].CurrentColumn != matrix [row, column].OriginalColumn) {
+					print ("nope");
 					return;
+				} else {
+					print ("GAME OVER!");
 				}
 			}
 		}
